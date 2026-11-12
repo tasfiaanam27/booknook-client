@@ -1,35 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-
-function getReturnUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const returnTo = params.get("callbackUrl");
-
-  // Only allow internal application routes.
-  if (
-    returnTo &&
-    returnTo.startsWith("/") &&
-    !returnTo.startsWith("//")
-  ) {
-    return returnTo;
-  }
-
-  return "/";
-}
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success">("error");
+
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  // Get the original requested page.
+  const getReturnUrl = () => {
+    const returnTo = searchParams.get("callbackUrl");
+
+    // Allow only internal application routes.
+    if (
+      returnTo &&
+      returnTo.startsWith("/") &&
+      !returnTo.startsWith("//")
+    ) {
+      return returnTo;
+    }
+
+    return "/";
+  };
+
+  // Email and password login
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -43,7 +47,9 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setMessage(error.message || "Unable to log in. Please check your credentials.");
+        setMessage(
+          error.message || "Unable to log in. Please check your credentials."
+        );
         setMessageType("error");
         return;
       }
@@ -65,6 +71,7 @@ export default function LoginPage() {
     }
   };
 
+  // Google login
   const handleGoogleLogin = async () => {
     setMessage("");
     setGoogleLoading(true);
@@ -94,6 +101,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#faf6f0] px-4 py-12">
       <div className="w-full max-w-md rounded-xl border border-[#e8ded5] bg-white p-8 shadow-sm">
+
         <h1 className="mb-2 text-center font-serif text-3xl font-bold text-[#641e2b]">
           Welcome Back
         </h1>
@@ -210,12 +218,12 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <a
+          <Link
             href="/register"
             className="font-semibold text-[#641e2b] hover:underline"
           >
             Register
-          </a>
+          </Link>
         </p>
       </div>
     </main>
