@@ -4,6 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
+function getReturnUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const returnTo = params.get("callbackUrl");
+
+  // Only allow internal application routes.
+  if (
+    returnTo &&
+    returnTo.startsWith("/") &&
+    !returnTo.startsWith("//")
+  ) {
+    return returnTo;
+  }
+
+  return "/";
+}
+
 export default function LoginPage() {
   const router = useRouter();
 
@@ -11,11 +27,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success">("error");
-
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Email and password login
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -23,31 +37,23 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email: email.trim(),
         password,
       });
 
       if (error) {
-        console.error("Email login error:", error);
-
-        setMessage(
-          error.message || error.statusText || "Unable to sign in. Please check your credentials."
-        );
+        setMessage(error.message || "Unable to log in. Please check your credentials.");
         setMessageType("error");
         return;
       }
 
-      console.log("Email login successful:", data);
-
       setMessage("Login successful! Redirecting...");
       setMessageType("success");
 
-      router.push("/");
+      router.replace(getReturnUrl());
       router.refresh();
     } catch (error) {
-      console.error("Email login exception:", error);
-
       setMessage(
         error instanceof Error
           ? error.message
@@ -59,7 +65,6 @@ export default function LoginPage() {
     }
   };
 
-  // Google login
   const handleGoogleLogin = async () => {
     setMessage("");
     setGoogleLoading(true);
@@ -67,27 +72,20 @@ export default function LoginPage() {
     try {
       const { error } = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: getReturnUrl(),
       });
 
       if (error) {
-        console.error("Google login error:", error);
-
-        setMessage(
-          error.message || error.statusText || "Google login failed."
-        );
+        setMessage(error.message || "Google login failed.");
         setMessageType("error");
         setGoogleLoading(false);
       }
     } catch (error) {
-      console.error("Google login exception:", error);
-
       setMessage(
         error instanceof Error
           ? error.message
           : "Unable to connect with Google."
       );
-
       setMessageType("error");
       setGoogleLoading(false);
     }
@@ -96,19 +94,15 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#faf6f0] px-4 py-12">
       <div className="w-full max-w-md rounded-xl border border-[#e8ded5] bg-white p-8 shadow-sm">
-
-        {/* Heading */}
         <h1 className="mb-2 text-center font-serif text-3xl font-bold text-[#641e2b]">
           Welcome Back
         </h1>
 
         <p className="mb-8 text-center text-sm text-gray-600">
-          Sign in to continue your BookNook journey.
+          Log in to continue your BookNook journey.
         </p>
 
-        {/* Email Login Form */}
         <form onSubmit={handleLogin} className="space-y-5">
-
           <div>
             <label
               htmlFor="email"
@@ -149,7 +143,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Feedback Message */}
           {message && (
             <p
               role="alert"
@@ -163,26 +156,21 @@ export default function LoginPage() {
             </p>
           )}
 
-          {/* Login Button */}
           <button
             type="submit"
             disabled={loading || googleLoading}
             className="w-full rounded-md bg-[#641e2b] px-4 py-3 font-medium text-white transition hover:bg-[#4d1721] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Divider */}
         <div className="my-6 flex items-center gap-4">
           <div className="h-px flex-1 bg-gray-200" />
-
           <span className="text-sm text-gray-500">OR</span>
-
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
-        {/* Google Login Button */}
         <button
           type="button"
           onClick={handleGoogleLogin}
@@ -215,23 +203,20 @@ export default function LoginPage() {
                   d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4 16 4 9.2 8.6 5.8 15.2l6.8 5.1c1.6-4.8 6.1-8.2 11.4-8.2Z"
                 />
               </svg>
-
               Continue with Google
             </>
           )}
         </button>
 
-        {/* Registration Link */}
         <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <a
             href="/register"
             className="font-semibold text-[#641e2b] hover:underline"
           >
-            Create an account
+            Register
           </a>
         </p>
-
       </div>
     </main>
   );
