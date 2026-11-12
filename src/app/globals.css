@@ -152,3 +152,35 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+.home-hero-swiper {
+  --swiper-theme-color: #faf6f0;
+}
+
+.home-hero-swiper .swiper-pagination {
+  bottom: 18px !important;
+}
+
+.home-hero-swiper .swiper-pagination-bullet {
+  background: #faf6f0;
+  opacity: 0.55;
+}
+
+.home-hero-swiper .swiper-pagination-bullet-active {
+  background: #faf6f0;
+  opacity: 1;
+}
+
+.home-hero-swiper .swiper-button-prev,
+.home-hero-swiper .swiper-button-next {
+  color: #faf6f0;
+  transform: scale(0.65);
+}
+
+@media (max-width: 640px) {
+
+  .home-hero-swiper .swiper-button-prev,
+  .home-hero-swiper .swiper-button-next {
+    display: none;
+  }
+}
