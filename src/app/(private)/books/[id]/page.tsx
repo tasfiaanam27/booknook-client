@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { authenticatedFetch } from "@/lib/api";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -34,7 +35,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function BookDetailsPage() {
   const params = useParams();
-  const router = useRouter();
   const bookId = params.id as string;
 
   const { data: session, isPending: sessionPending } =
@@ -71,21 +71,30 @@ export default function BookDetailsPage() {
     fetchBook();
   }, [bookId]);
 
+  const refreshBook = async () => {
+    const response = await fetch(`${API_URL}/books/${bookId}`);
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      setBook(result.data);
+    }
+  };
+
   const handleBorrow = async () => {
-    if (!session?.user || !book) {
+    if (!session?.user) {
       toast.error("Please log in to borrow a book.");
       return;
     }
 
-    if (book.availableCopies < 1) {
-      toast.error("Sorry, this book is currently unavailable.");
+    if (!book || book.availableCopies < 1) {
+      toast.error("This book is currently unavailable.");
       return;
     }
 
     setBorrowing(true);
 
     try {
-      const response = await fetch(`${API_URL}/borrows`, {
+      const response = await authenticatedFetch("/borrows", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,15 +113,7 @@ export default function BookDetailsPage() {
       toast.success("Book borrowed successfully!");
       setBorrowModalOpen(false);
 
-      // Refresh the book availability after borrowing.
-      const updatedResponse = await fetch(`${API_URL}/books/${bookId}`);
-      const updatedResult = await updatedResponse.json();
-
-      if (updatedResponse.ok && updatedResult.success) {
-        setBook(updatedResult.data);
-      }
-
-      router.refresh();
+      await refreshBook();
     } catch (error) {
       console.error("Borrow book error:", error);
       toast.error(
@@ -135,10 +136,7 @@ export default function BookDetailsPage() {
     return (
       <section className="flex min-h-[60vh] items-center justify-center bg-[#faf6f0] px-4">
         <div className="text-center">
-          <BookOpen
-            size={42}
-            className="mx-auto mb-3 text-[#9b8586]"
-          />
+          <BookOpen size={42} className="mx-auto mb-3 text-[#9b8586]" />
           <h1 className="font-serif text-2xl font-bold text-[#641e2b]">
             Book Not Found
           </h1>
@@ -162,14 +160,13 @@ export default function BookDetailsPage() {
       <div className="mx-auto max-w-5xl">
         <Link
           href="/books"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#641e2b] transition hover:text-[#9b6b70]"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#641e2b] hover:text-[#9b6b70]"
         >
           <ArrowLeft size={17} />
           Back to All Books
         </Link>
 
         <div className="grid overflow-hidden rounded-2xl border border-[#eadfd5] bg-white shadow-sm md:grid-cols-[300px_1fr]">
-          {/* Book Cover */}
           <div className="flex min-h-[300px] items-center justify-center bg-[#f1eae2] p-6 md:min-h-[420px]">
             <img
               src={book.image}
@@ -178,7 +175,6 @@ export default function BookDetailsPage() {
             />
           </div>
 
-          {/* Book Information */}
           <div className="flex flex-col justify-center p-6 sm:p-8">
             <span className="w-fit rounded-full bg-[#f1e5e2] px-3 py-1 text-xs font-semibold text-[#641e2b]">
               {book.category}
@@ -206,9 +202,7 @@ export default function BookDetailsPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f1eae2] text-[#641e2b]">
-                  <BookOpen size={18} />
-                </span>
+                <BookOpen size={18} className="text-[#641e2b]" />
                 <div>
                   <p className="text-xs text-[#9b8586]">Available Copies</p>
                   <p className="mt-1 text-sm font-semibold text-[#34282a]">
@@ -218,9 +212,7 @@ export default function BookDetailsPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#f1eae2] text-[#641e2b]">
-                  <CalendarDays size={18} />
-                </span>
+                <CalendarDays size={18} className="text-[#641e2b]" />
                 <div>
                   <p className="text-xs text-[#9b8586]">Date Added</p>
                   <p className="mt-1 text-sm font-semibold text-[#34282a]">
@@ -269,7 +261,6 @@ export default function BookDetailsPage() {
         </div>
       </div>
 
-      {/* Borrow Confirmation Modal */}
       {borrowModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4">
           <div
@@ -346,7 +337,7 @@ export default function BookDetailsPage() {
             </div>
 
             <p className="mt-4 text-xs leading-5 text-[#8b7c7e]">
-              Please confirm that you want to borrow this book.
+              Borrowing period: 14 days from the date of borrowing.
             </p>
 
             <div className="mt-6 flex gap-3">
