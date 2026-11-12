@@ -407,7 +407,68 @@ export default function Home() {
         </div>
       </section>
 
-      
+      <section className="px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-11">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#a66b59]">
+              A little reading inspiration
+            </p>
+
+            <h2 className="font-serif text-3xl font-bold text-[#542b36] sm:text-4xl">
+              Every Mood Has a Story.
+            </h2>
+
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[#806f70]">
+              Some days call for an escape. Others call for a little
+              curiosity. Whatever the mood, there's a story waiting for
+              you.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {moods.map((mood) => {
+              const MoodIcon = mood.icon;
+
+              return (
+                <div
+                  key={mood.number}
+                  className={`group relative min-h-[260px] overflow-hidden rounded-xl ${mood.background} p-6 transition duration-300 hover:-translate-y-1`}
+                >
+                  <div
+                    className={`absolute -right-10 -top-10 h-36 w-36 rounded-full ${mood.decoration} opacity-60 transition duration-500 group-hover:scale-125`}
+                  />
+
+                  <div className="relative z-10 flex h-full flex-col">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold tracking-[0.18em] text-[#806f70]">
+                        {mood.number}
+                      </span>
+
+                      <MoodIcon
+                        size={29}
+                        strokeWidth={1.4}
+                        className={mood.iconColor}
+                      />
+                    </div>
+
+                    <div className="mt-auto pt-16">
+                      <p className="mb-2 text-[10px] font-semibold tracking-[0.2em] text-[#806f70]">
+                        {mood.category}
+                      </p>
+
+                      <h3 className="font-serif text-2xl font-bold leading-tight text-[#542b36]">
+                        {mood.title}
+                      </h3>
+
+                      <p className="mt-3 text-sm leading-6 text-[#705e5e]">
+                        {mood.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
           <div className="mt-10 flex flex-col items-center justify-between gap-5 rounded-xl bg-[#542b36] px-7 py-8 text-center sm:flex-row sm:text-left">
             <div>
