@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { authenticatedFetch } from "@/lib/api";
 import { toast } from "sonner";
 import {
   BookPlus,
@@ -114,11 +115,11 @@ export default function AddBookPage() {
     setLoading(true);
 
     try {
-      // Step 1: Upload the image to ImgBB through our backend
+      // Step 1: Upload the image to ImgBB through our backend.
       const imageFormData = new FormData();
       imageFormData.append("image", imageFile);
 
-      const uploadResponse = await fetch(`${API_URL}/upload`, {
+      const uploadResponse = await authenticatedFetch("/upload", {
         method: "POST",
         body: imageFormData,
       });
@@ -137,7 +138,8 @@ export default function AddBookPage() {
         throw new Error("No image URL was returned.");
       }
 
-      // Step 2: Save the book to MongoDB
+      // Step 2: Save the book using JWT authentication.
+      // The backend obtains the user's identity from the verified JWT.
       const bookData = {
         title: formData.title.trim(),
         author: formData.author.trim(),
@@ -145,11 +147,9 @@ export default function AddBookPage() {
         image: imageUrl,
         description: formData.description.trim(),
         totalCopies,
-        addedByName: session.user.name,
-        addedByEmail: session.user.email,
       };
 
-      const bookResponse = await fetch(`${API_URL}/books`, {
+      const bookResponse = await authenticatedFetch("/books", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -226,6 +226,7 @@ export default function AddBookPage() {
             >
               Book Title *
             </label>
+
             <input
               id="title"
               name="title"
@@ -246,6 +247,7 @@ export default function AddBookPage() {
               >
                 Author Name *
               </label>
+
               <input
                 id="author"
                 name="author"
@@ -264,6 +266,7 @@ export default function AddBookPage() {
               >
                 Category *
               </label>
+
               <select
                 id="category"
                 name="category"
@@ -273,6 +276,7 @@ export default function AddBookPage() {
                 className="w-full rounded-xl border border-[#e5d8d0] bg-[#fffdfa] px-4 py-3 text-sm outline-none focus:border-[#641e2b]"
               >
                 <option value="">Select a category</option>
+
                 {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -300,9 +304,11 @@ export default function AddBookPage() {
                   size={35}
                   className="mb-3 text-[#9b6b70]"
                 />
+
                 <span className="text-sm font-semibold text-[#641e2b]">
                   Click to upload a book cover
                 </span>
+
                 <span className="mt-2 text-xs text-[#8b7c7e]">
                   JPG, PNG or WebP (maximum 5 MB)
                 </span>
@@ -344,6 +350,7 @@ export default function AddBookPage() {
             >
               Short Description *
             </label>
+
             <textarea
               id="description"
               name="description"
@@ -364,6 +371,7 @@ export default function AddBookPage() {
             >
               Total Copies *
             </label>
+
             <input
               id="totalCopies"
               name="totalCopies"
@@ -391,6 +399,7 @@ export default function AddBookPage() {
                 >
                   User Name
                 </label>
+
                 <input
                   id="addedByName"
                   value={session?.user?.name || ""}
@@ -406,6 +415,7 @@ export default function AddBookPage() {
                 >
                   User Email
                 </label>
+
                 <input
                   id="addedByEmail"
                   value={session?.user?.email || ""}
@@ -439,3 +449,4 @@ export default function AddBookPage() {
     </section>
   );
 }
+
