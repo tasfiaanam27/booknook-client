@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { authenticatedFetch } from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
 import {
@@ -42,6 +43,7 @@ export default function MyBooksPage() {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Retrieve all books and filter by the logged-in user's email.
   const fetchMyBooks = useCallback(async () => {
     if (!session?.user?.email || !API_URL) return;
 
@@ -80,6 +82,7 @@ export default function MyBooksPage() {
     }
   }, [session?.user?.email, sessionPending, fetchMyBooks]);
 
+  // Delete a book using JWT authentication.
   const handleDelete = async () => {
     if (!bookToDelete) return;
 
@@ -87,7 +90,7 @@ export default function MyBooksPage() {
     setDeletingId(id);
 
     try {
-      const response = await fetch(`${API_URL}/books/${id}`, {
+      const response = await authenticatedFetch(`/books/${id}`, {
         method: "DELETE",
       });
 
@@ -110,6 +113,7 @@ export default function MyBooksPage() {
     }
   };
 
+  // Update a book using JWT authentication.
   const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -123,27 +127,32 @@ export default function MyBooksPage() {
     }
 
     if (totalCopies < editingBook.totalCopies - editingBook.availableCopies) {
-      toast.error("Total copies cannot be less than the copies currently borrowed.");
+      toast.error(
+        "Total copies cannot be less than the copies currently borrowed."
+      );
       return;
     }
 
     setSaving(true);
 
     try {
-      const response = await fetch(`${API_URL}/books/${editingBook._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: editingBook.title.trim(),
-          author: editingBook.author.trim(),
-          category: editingBook.category,
-          image: editingBook.image.trim(),
-          description: editingBook.description.trim(),
-          totalCopies,
-        }),
-      });
+      const response = await authenticatedFetch(
+        `/books/${editingBook._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: editingBook.title.trim(),
+            author: editingBook.author.trim(),
+            category: editingBook.category,
+            image: editingBook.image.trim(),
+            description: editingBook.description.trim(),
+            totalCopies,
+          }),
+        }
+      );
 
       const result = await response.json();
 
@@ -494,3 +503,4 @@ export default function MyBooksPage() {
     </section>
   );
 }
+
