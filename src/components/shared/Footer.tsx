@@ -8,7 +8,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="mt-auto bg-[#32171e] text-[#faf6f0]">
+    <footer className="mt-auto border-t border-[#80646a]/30 bg-[#32171e] text-[#faf6f0] transition-colors duration-300 dark:border-[#514044] dark:bg-[#171113]">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
 
         {/* Brand */}
@@ -132,7 +132,7 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="border-t border-[#80646a]/50">
+      <div className="border-t border-[#80646a]/50 dark:border-[#514044]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-center text-xs text-[#cdb9b7] sm:px-6 md:flex-row lg:px-8">
           <p>
             © {new Date().getFullYear()} BookNook. All rights reserved.
@@ -144,4 +144,3 @@ export default function Footer() {
     </footer>
   );
 }
-

@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -20,16 +21,41 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col bg-[#faf6f0] font-sans text-[#34282a] antialiased">
-        <Navbar />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const savedTheme = localStorage.getItem("booknook-theme");
+                const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                const theme =
+                  savedTheme === "dark" || savedTheme === "light"
+                    ? savedTheme
+                    : systemDark
+                      ? "dark"
+                      : "light";
 
-        <main className="flex-1">{children}</main>
+                document.documentElement.classList.toggle("dark", theme === "dark");
+                document.documentElement.style.colorScheme = theme;
+              } catch (error) {}
+            `,
+          }}
+        />
+      </head>
 
-        <Footer />
+      <body className="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
+        <ThemeProvider>
+          <Navbar />
 
-        <Toaster position="top-right" richColors />
+          <main className="flex-1">{children}</main>
+
+          <Footer />
+
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+

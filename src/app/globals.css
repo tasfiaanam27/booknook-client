@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -46,7 +47,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* LIGHT THEME - Original BookNook palette */
 :root {
+  color-scheme: light;
+
   --background: #faf6f0;
   --foreground: #34282a;
 
@@ -86,7 +90,10 @@
   --sidebar-ring: #9c5966;
 }
 
+/* DARK THEME - Complementary BookNook palette */
 .dark {
+  color-scheme: dark;
+
   --background: #211719;
   --foreground: #faf6f0;
 
@@ -136,6 +143,9 @@
   body {
     @apply bg-background text-foreground;
     font-family: Arial, Helvetica, sans-serif;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
   }
 
   h1,
@@ -153,6 +163,74 @@
   }
 }
 
+/*
+  DARK MODE COMPATIBILITY
+  These rules adapt existing fixed Tailwind colours
+  without requiring every page to be rewritten.
+*/
+
+/* Fixed light backgrounds */
+.dark [class~="bg-[#faf6f0]"],
+.dark [class~="bg-[#faf6f0]/90"] {
+  background-color: var(--background) !important;
+}
+
+.dark [class~="bg-white"],
+.dark [class~="bg-[#ffffff]"] {
+  background-color: var(--card) !important;
+}
+
+.dark [class~="bg-[#f1eae2]"],
+.dark [class~="bg-[#f1e5dc]"] {
+  background-color: var(--muted) !important;
+}
+
+.dark [class~="bg-[#eadfd5]"],
+.dark [class~="bg-[#eee5dc]"] {
+  background-color: var(--secondary) !important;
+}
+
+/* Fixed light text colours */
+.dark [class~="text-[#34282a]"],
+.dark [class~="text-[#51474a]"],
+.dark [class~="text-[#51474a]"] {
+  color: var(--foreground) !important;
+}
+
+.dark [class~="text-[#746b6d]"],
+.dark [class~="text-gray-500"],
+.dark [class~="text-gray-600"],
+.dark [class~="text-gray-700"] {
+  color: var(--muted-foreground) !important;
+}
+
+/* Fixed borders */
+.dark [class~="border-[#eadfd5]"],
+.dark [class~="border-[#e8ded5]"],
+.dark [class~="border-[#eee5dc]"] {
+  border-color: var(--border) !important;
+}
+
+/* Hover backgrounds */
+.dark [class~="hover:bg-[#faf6f0]"]:hover,
+.dark [class~="hover:bg-[#f1eae2]"]:hover {
+  background-color: var(--muted) !important;
+}
+
+/* Keep the brand burgundy recognizable in dark mode */
+.dark [class~="bg-[#641e2b]"] {
+  background-color: #641e2b !important;
+}
+
+.dark [class~="text-[#641e2b]"] {
+  color: #e5b9bf !important;
+}
+
+.dark [class~="border-[#641e2b]"] {
+  border-color: #a86a77 !important;
+}
+
+/* Hero slider */
 .home-hero-swiper {
   --swiper-theme-color: #faf6f0;
 }
@@ -178,7 +256,6 @@
 }
 
 @media (max-width: 640px) {
-
   .home-hero-swiper .swiper-button-prev,
   .home-hero-swiper .swiper-button-next {
     display: none;
