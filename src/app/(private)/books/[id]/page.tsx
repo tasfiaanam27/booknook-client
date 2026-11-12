@@ -31,8 +31,6 @@ type Book = {
   createdAt: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export default function BookDetailsPage() {
   const params = useParams();
   const bookId = params.id as string;
@@ -45,12 +43,13 @@ export default function BookDetailsPage() {
   const [borrowModalOpen, setBorrowModalOpen] = useState(false);
   const [borrowing, setBorrowing] = useState(false);
 
+  // Fetch book details using JWT authentication.
   useEffect(() => {
-    if (!bookId || !API_URL) return;
+    if (!bookId) return;
 
     const fetchBook = async () => {
       try {
-        const response = await fetch(`${API_URL}/books/${bookId}`);
+        const response = await authenticatedFetch(`/books/${bookId}`);
         const result = await response.json();
 
         if (!response.ok || !result.success) {
@@ -61,7 +60,9 @@ export default function BookDetailsPage() {
       } catch (error) {
         console.error("Book details error:", error);
         toast.error(
-          error instanceof Error ? error.message : "Could not load the book."
+          error instanceof Error
+            ? error.message
+            : "Could not load the book."
         );
       } finally {
         setLoading(false);
@@ -71,8 +72,9 @@ export default function BookDetailsPage() {
     fetchBook();
   }, [bookId]);
 
+  // Refresh book information after borrowing.
   const refreshBook = async () => {
-    const response = await fetch(`${API_URL}/books/${bookId}`);
+    const response = await authenticatedFetch(`/books/${bookId}`);
     const result = await response.json();
 
     if (response.ok && result.success) {
@@ -117,7 +119,9 @@ export default function BookDetailsPage() {
     } catch (error) {
       console.error("Borrow book error:", error);
       toast.error(
-        error instanceof Error ? error.message : "Could not borrow this book."
+        error instanceof Error
+          ? error.message
+          : "Could not borrow this book."
       );
     } finally {
       setBorrowing(false);
@@ -137,12 +141,15 @@ export default function BookDetailsPage() {
       <section className="flex min-h-[60vh] items-center justify-center bg-[#faf6f0] px-4">
         <div className="text-center">
           <BookOpen size={42} className="mx-auto mb-3 text-[#9b8586]" />
+
           <h1 className="font-serif text-2xl font-bold text-[#641e2b]">
             Book Not Found
           </h1>
+
           <p className="mt-2 text-sm text-[#74666a]">
             This book may have been removed or does not exist.
           </p>
+
           <Link
             href="/books"
             className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#641e2b] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4d1721]"
@@ -203,6 +210,7 @@ export default function BookDetailsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex items-start gap-3">
                 <BookOpen size={18} className="text-[#641e2b]" />
+
                 <div>
                   <p className="text-xs text-[#9b8586]">Available Copies</p>
                   <p className="mt-1 text-sm font-semibold text-[#34282a]">
@@ -213,6 +221,7 @@ export default function BookDetailsPage() {
 
               <div className="flex items-start gap-3">
                 <CalendarDays size={18} className="text-[#641e2b]" />
+
                 <div>
                   <p className="text-xs text-[#9b8586]">Date Added</p>
                   <p className="mt-1 text-sm font-semibold text-[#34282a]">
@@ -294,10 +303,12 @@ export default function BookDetailsPage() {
                 alt={book.title}
                 className="h-16 w-12 rounded object-contain"
               />
+
               <div>
                 <p className="font-serif font-bold text-[#34282a]">
                   {book.title}
                 </p>
+
                 <p className="mt-1 text-xs text-[#74666a]">
                   by {book.author}
                 </p>
@@ -312,6 +323,7 @@ export default function BookDetailsPage() {
                 >
                   User Name
                 </label>
+
                 <input
                   id="borrowerName"
                   value={session?.user?.name || ""}
@@ -327,6 +339,7 @@ export default function BookDetailsPage() {
                 >
                   User Email
                 </label>
+
                 <input
                   id="borrowerEmail"
                   value={session?.user?.email || ""}
@@ -361,6 +374,7 @@ export default function BookDetailsPage() {
                 ) : (
                   <BookmarkPlus size={16} />
                 )}
+
                 {borrowing ? "Processing..." : "Confirm Borrow"}
               </button>
             </div>
