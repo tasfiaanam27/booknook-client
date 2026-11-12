@@ -43,7 +43,7 @@ export default function MyBooksPage() {
   const [saving, setSaving] = useState(false);
 
   const fetchMyBooks = useCallback(async () => {
-    if (!session?.user?.email) return;
+    if (!session?.user?.email || !API_URL) return;
 
     setLoading(true);
 
@@ -75,8 +75,10 @@ export default function MyBooksPage() {
   useEffect(() => {
     if (session?.user?.email) {
       fetchMyBooks();
+    } else if (!sessionPending) {
+      setLoading(false);
     }
-  }, [session?.user?.email, fetchMyBooks]);
+  }, [session?.user?.email, sessionPending, fetchMyBooks]);
 
   const handleDelete = async () => {
     if (!bookToDelete) return;
@@ -95,10 +97,7 @@ export default function MyBooksPage() {
         throw new Error(result.message || "Could not delete the book.");
       }
 
-      setBooks((previous) =>
-        previous.filter((book) => book._id !== id)
-      );
-
+      setBooks((previous) => previous.filter((book) => book._id !== id));
       setBookToDelete(null);
       toast.success("Book deleted successfully.");
     } catch (error) {
@@ -123,26 +122,28 @@ export default function MyBooksPage() {
       return;
     }
 
+    if (totalCopies < editingBook.totalCopies - editingBook.availableCopies) {
+      toast.error("Total copies cannot be less than the copies currently borrowed.");
+      return;
+    }
+
     setSaving(true);
 
     try {
-      const response = await fetch(
-        `${API_URL}/books/${editingBook._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title: editingBook.title.trim(),
-            author: editingBook.author.trim(),
-            category: editingBook.category,
-            image: editingBook.image.trim(),
-            description: editingBook.description.trim(),
-            totalCopies,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/books/${editingBook._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: editingBook.title.trim(),
+          author: editingBook.author.trim(),
+          category: editingBook.category,
+          image: editingBook.image.trim(),
+          description: editingBook.description.trim(),
+          totalCopies,
+        }),
+      });
 
       const result = await response.json();
 
@@ -174,7 +175,6 @@ export default function MyBooksPage() {
   return (
     <section className="min-h-[70vh] bg-[#faf6f0] px-4 py-10 sm:px-6 lg:py-12">
       <div className="mx-auto max-w-7xl">
-        {/* Page Heading */}
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#9b6b70]">
@@ -197,18 +197,14 @@ export default function MyBooksPage() {
           </Link>
         </div>
 
-        {/* Book Count */}
         <div className="mb-6 inline-flex items-center gap-3 rounded-xl border border-[#eadfd5] bg-white px-4 py-3">
           <BookOpen size={19} className="text-[#641e2b]" />
-          <span className="text-sm text-[#74666a]">
-            My Collection:
-          </span>
+          <span className="text-sm text-[#74666a]">My Collection:</span>
           <span className="text-lg font-bold text-[#641e2b]">
             {books.length}
           </span>
         </div>
 
-        {/* Empty State */}
         {books.length === 0 ? (
           <div className="rounded-xl border border-dashed border-[#d9c6bd] bg-white px-5 py-12 text-center">
             <BookOpen
@@ -230,14 +226,13 @@ export default function MyBooksPage() {
             </Link>
           </div>
         ) : (
-          /* Compact Book Cards */
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6">
+          <div className="grid grid-cols-1 items-start justify-items-center gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6">
             {books.map((book) => (
               <article
                 key={book._id}
-                className="overflow-hidden rounded-xl border border-[#eadfd5] bg-white shadow-sm transition hover:shadow-md"
+                className="w-full max-w-[340px] overflow-hidden rounded-xl border border-[#eadfd5] bg-white shadow-sm transition hover:shadow-md"
               >
-                <div className="flex h-[185px] items-center justify-center bg-[#f1eae2] p-3">
+                <div className="flex h-[160px] items-center justify-center bg-[#f1eae2] p-3">
                   <img
                     src={book.image}
                     alt={`Cover of ${book.title}`}
@@ -259,9 +254,7 @@ export default function MyBooksPage() {
                   </p>
 
                   <div className="mt-3 flex items-center justify-between border-t border-[#eee5dc] pt-3 text-xs">
-                    <span className="text-[#74666a]">
-                      Available Copies
-                    </span>
+                    <span className="text-[#74666a]">Available Copies</span>
                     <span className="font-semibold text-[#641e2b]">
                       {book.availableCopies} / {book.totalCopies}
                     </span>
@@ -326,7 +319,7 @@ export default function MyBooksPage() {
                 type="button"
                 onClick={() => setBookToDelete(null)}
                 disabled={deletingId === bookToDelete._id}
-                className="flex-1 rounded-lg border border-[#e5d8d0] px-4 py-2.5 text-sm font-semibold text-[#51474a] transition hover:bg-[#faf6f0] disabled:opacity-50"
+                className="flex-1 rounded-lg border border-[#e5d8d0] px-4 py-2.5 text-sm font-semibold text-[#51474a] hover:bg-[#faf6f0] disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -335,7 +328,7 @@ export default function MyBooksPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={deletingId === bookToDelete._id}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-800 disabled:opacity-60"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
               >
                 {deletingId === bookToDelete._id ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -379,10 +372,7 @@ export default function MyBooksPage() {
                   required
                   value={editingBook.title}
                   onChange={(event) =>
-                    setEditingBook({
-                      ...editingBook,
-                      title: event.target.value,
-                    })
+                    setEditingBook({ ...editingBook, title: event.target.value })
                   }
                   className="w-full rounded-lg border border-[#e5d8d0] px-3 py-2.5 text-sm outline-none focus:border-[#641e2b]"
                 />
@@ -396,10 +386,7 @@ export default function MyBooksPage() {
                   required
                   value={editingBook.author}
                   onChange={(event) =>
-                    setEditingBook({
-                      ...editingBook,
-                      author: event.target.value,
-                    })
+                    setEditingBook({ ...editingBook, author: event.target.value })
                   }
                   className="w-full rounded-lg border border-[#e5d8d0] px-3 py-2.5 text-sm outline-none focus:border-[#641e2b]"
                 />
@@ -413,10 +400,7 @@ export default function MyBooksPage() {
                   required
                   value={editingBook.category}
                   onChange={(event) =>
-                    setEditingBook({
-                      ...editingBook,
-                      category: event.target.value,
-                    })
+                    setEditingBook({ ...editingBook, category: event.target.value })
                   }
                   className="w-full rounded-lg border border-[#e5d8d0] px-3 py-2.5 text-sm outline-none focus:border-[#641e2b]"
                 >
@@ -437,10 +421,7 @@ export default function MyBooksPage() {
                   required
                   value={editingBook.image}
                   onChange={(event) =>
-                    setEditingBook({
-                      ...editingBook,
-                      image: event.target.value,
-                    })
+                    setEditingBook({ ...editingBook, image: event.target.value })
                   }
                   className="w-full rounded-lg border border-[#e5d8d0] px-3 py-2.5 text-sm outline-none focus:border-[#641e2b]"
                 />

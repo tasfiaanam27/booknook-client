@@ -24,5 +24,6 @@ export const config = {
     "/my-books/:path*",
     "/my-borrows/:path*",
     "/profile/:path*",
+    "/books/:id",
   ],
 };
