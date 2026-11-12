@@ -328,5 +328,108 @@ export default function Home() {
         </div>
       </section>
 
+      {/* HOW BORROWING WORKS */}
+      <section className="bg-[#f0e8df] px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#a66b59]">
+              A few simple steps
+            </p>
+
+            <h2 className="font-serif text-3xl font-bold text-[#542b36] sm:text-4xl">
+              How Borrowing Works
+            </h2>
+
+            <p className="mt-4 text-sm leading-7 text-[#806f70]">
+              Finding your next read is easy. Choose a book, enjoy the
+              journey, and return it for another reader.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+            <div className="relative text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#542b36] text-white">
+                <Compass size={32} strokeWidth={1.5} />
+              </div>
+
+              <p className="mt-5 text-xs font-semibold tracking-[0.2em] text-[#a66b59]">
+                STEP 01
+              </p>
+
+              <h3 className="mt-2 font-serif text-xl font-bold text-[#542b36]">
+                Find Your Book
+              </h3>
+
+              <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-[#806f70]">
+                Browse the library and discover a book that catches your
+                interest.
+              </p>
+            </div>
+
+            <div className="relative text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#542b36] text-white">
+                <BookOpen size={32} strokeWidth={1.5} />
+              </div>
+
+              <p className="mt-5 text-xs font-semibold tracking-[0.2em] text-[#a66b59]">
+                STEP 02
+              </p>
+
+              <h3 className="mt-2 font-serif text-xl font-bold text-[#542b36]">
+                Borrow & Enjoy
+              </h3>
+
+              <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-[#806f70]">
+                Confirm your borrow request and enjoy your book for 14
+                days.
+              </p>
+            </div>
+
+            <div className="relative text-center">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#542b36] text-white">
+                <Clock3 size={32} strokeWidth={1.5} />
+              </div>
+
+              <p className="mt-5 text-xs font-semibold tracking-[0.2em] text-[#a66b59]">
+                STEP 03
+              </p>
+
+              <h3 className="mt-2 font-serif text-xl font-bold text-[#542b36]">
+                Return & Share
+              </h3>
+
+              <p className="mx-auto mt-3 max-w-xs text-sm leading-6 text-[#806f70]">
+                Return your book through My Borrows so another reader can
+                enjoy it too.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       
+
+          <div className="mt-10 flex flex-col items-center justify-between gap-5 rounded-xl bg-[#542b36] px-7 py-8 text-center sm:flex-row sm:text-left">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d9b7a8]">
+                Your next chapter awaits
+              </p>
+
+              <h3 className="mt-2 font-serif text-2xl font-bold text-white">
+                What will you read today?
+              </h3>
+            </div>
+
+            <Link
+              href="/books"
+              className="inline-flex shrink-0 items-center gap-3 rounded-lg bg-[#faf6f0] px-6 py-3 text-sm font-semibold text-[#542b36] transition hover:bg-white"
+            >
+              Explore the Library
+              <ArrowRight size={17} />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
